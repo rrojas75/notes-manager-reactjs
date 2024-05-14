@@ -6,14 +6,27 @@ export const noteSlice = createSlice({
     noteList: [],
   },
   reducers: {
-    setNoteList: (state, action) => {
-      state.noteList = action.payload;
+    setNoteList: (currentSlice, action) => {
+      currentSlice.noteList = action.payload;
     },
-    addNote: (state, action) => {
-      state.noteList.push(action.payload);
+    addNote: (currentSlice, action) => {
+      currentSlice.noteList.push(action.payload);
+    },
+    updateNote: (currentSlice, action) => {
+      const noteIndex = currentSlice.noteList.findIndex(
+        (note) => note.id === action.payload.id
+      );
+      currentSlice.noteList[noteIndex] = action.payload;
+    },
+    deleteNote: (currentSlice, action) => {
+      const filteredNoteList = currentSlice.noteList.filter(
+        (note) => note.id !== action.payload.id
+      );
+      currentSlice.noteList = filteredNoteList;
     },
   },
 });
 
 export const noteReducer = noteSlice.reducer;
-export const { setNoteList, addNote } = noteSlice.actions;
+export const { setNoteList, addNote, updateNote, deleteNote } =
+  noteSlice.actions;

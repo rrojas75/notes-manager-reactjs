@@ -14,11 +14,21 @@ const VALIDATOR = {
   },
 };
 
-export function NoteForm({ title, onClickEdit, onClickDelete, onSubmit }) {
-  const [formValues, setFormValues] = useState({ title: "", content: "" });
+export function NoteForm({
+  isEditable = true,
+  note,
+  title,
+  onClickEdit,
+  onClickDelete,
+  onSubmit,
+}) {
+  const [formValues, setFormValues] = useState({
+    title: note?.title || "",
+    content: note?.content || "",
+  });
   const [formErrors, setFormErrors] = useState({
-    title: true,
-    content: true,
+    title: note?.title ? undefined : true,
+    content: note?.content ? undefined : true,
   });
 
   const updateFormValues = (e) => {
@@ -49,10 +59,12 @@ export function NoteForm({ title, onClickEdit, onClickDelete, onSubmit }) {
   const actionIcons = (
     <>
       <div className="col-1">
-        {onClickEdit && <PencilFill className={s.icon} />}
+        {onClickEdit && <PencilFill onClick={onClickEdit} className={s.icon} />}
       </div>
       <div className="col-1">
-        {onClickDelete && <TrashFill className={s.icon} />}
+        {onClickDelete && (
+          <TrashFill onClick={onClickDelete} className={s.icon} />
+        )}
       </div>
     </>
   );
@@ -65,6 +77,7 @@ export function NoteForm({ title, onClickEdit, onClickDelete, onSubmit }) {
         type="text"
         name="title"
         className="form-control"
+        value={formValues.title}
       />
       <FieldError msg={formErrors.title} />
     </div>
@@ -79,6 +92,7 @@ export function NoteForm({ title, onClickEdit, onClickDelete, onSubmit }) {
         name="content"
         className="form-control"
         rows="5"
+        value={formValues.content}
       />
       <FieldError msg={formErrors.content} />
     </div>
@@ -99,13 +113,17 @@ export function NoteForm({ title, onClickEdit, onClickDelete, onSubmit }) {
     <div className={s.container}>
       <div className="row justify-content-space-between">
         <div className="col-10">
-          <h2 className="mb-3">{title}</h2>
+          <h2 className="mb-3">{isEditable ? title : note && note.title}</h2>
         </div>
         {actionIcons}
       </div>
 
-      <div className={`mb-3 ${s.title_input_container}`}>{titleInput}</div>
-      <div className="mb-3">{contentInput}</div>
+      <div className={`mb-3 ${s.title_input_container}`}>
+        {isEditable && titleInput}
+      </div>
+      <div className="mb-3">
+        {isEditable ? contentInput : <pre>{note.content}</pre>}
+      </div>
       {onSubmit && submitBtn}
     </div>
   );
