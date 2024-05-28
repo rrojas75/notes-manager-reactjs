@@ -1,0 +1,17 @@
+.formGroup {
+    margin-top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.title {
+    font-weight: bold;
+    text-align: center;
+}
+
+.button {
+margin-top: 50px;
+width: 100%;
+}
