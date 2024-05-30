@@ -1,25 +1,62 @@
-import axios from "axios";
-
-const BASE_URL = "http://localhost:3200/notes";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
+import { FirebaseApp } from "utils/firebase";
 
 export class NoteAPI {
   static async create(note) {
-    return (await axios.post(`${BASE_URL}`, note)).data;
+    const response = addDoc(collection(FirebaseApp.db, "notes"), note);
+    return {
+      id: response.id,
+      ...note,
+    };
   }
 
   static async fetchAll() {
-    return (await axios.get(`${BASE_URL}`)).data;
-  }
-
-  static async fetchById(noteId) {
-    return (await axios.get(`${BASE_URL}/${noteId}`)).data;
+    const q = query(
+      collection(FirebaseApp.db, "notes"),
+      orderBy("created_at", "asc")
+    );
+    const response = await getDocs(q);
+    return response.docs.map((document) => {
+      return {
+        id: document.id,
+        ...document.data(),
+      };
+    });
   }
 
   static async deleteById(noteId) {
-    return (await axios.delete(`${BASE_URL}/${noteId}`)).data;
+    deleteDoc(doc(FirebaseApp.db, "notes", noteId));
   }
 
-  static async updateById(note) {
-    return (await axios.patch(`${BASE_URL}/${note.id}`, note)).data;
+  static async updateById(id, note) {
+    const query = doc(FirebaseApp.db, "notes", id);
+    await updateDoc(query, note);
+    return {
+      id,
+      ...note,
+    };
+  }
+
+  static onShouldSyncNotes(onChange) {
+    const q = query(collection(FirebaseApp.db, "notes"));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const isUserPerformingChange = querySnapshot.metadata.hasPendingWrites;
+      if (!isUserPerformingChange) {
+        onChange();
+        console.log("You are not sync with the notes collection");
+      }
+    });
+
+    return unsubscribe;
   }
 }
